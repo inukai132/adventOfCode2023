@@ -3,6 +3,7 @@ from aoclib import *
 
 DAY = 8
 
+DAY = 2
 
 
 try:
