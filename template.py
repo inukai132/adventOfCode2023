@@ -1,8 +1,18 @@
 import requests
+from aoclib import *
 
-DAY = 2
+DAY = 8
 
-inp = requests.get(f"https://adventofcode.com/2023/day/{DAY}/input", headers={'cookie':'session=53616c7465645f5fdd43845c5356a0c1945ec6af39857de05986f0b1429dcec01d14f21459ebed0f9abfbfcff006c9e3b3282785b66d2d9fbb4969cb6b69e296'}).text.split('\n')
+
+
+try:
+  inp = open(f"INPUT{DAY}",'r').read()
+except Exception:
+  inp = requests.get(makeAOCLink(DAY), headers=AOCHeaders)
+  assert inp.status_code == 200
+  inp = inp.text.strip()
+  open(f"INPUT{DAY}",'w').write(inp)
+inp = inp.strip().split('\n')
 
 for l in inp:
   print(l)
