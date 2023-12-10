@@ -25,7 +25,6 @@ class Cell:
     if type(other) == type(self):
       return other.value >= self.value
     raise NotImplementedError(f"Cannot __le__ between {type(other)} and Cell")
-
   def __gt__(self, other):
     if type(other) == type(self.value):
       return other < self.value

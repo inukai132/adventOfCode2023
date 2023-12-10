@@ -1,9 +1,8 @@
 import requests
 from aoclib import *
 
-DAY = 8
+DAY = 10
 
-DAY = 2
 
 
 try:
