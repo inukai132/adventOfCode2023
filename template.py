@@ -1,7 +1,7 @@
 import requests
 from aoclib import *
 
-DAY = 10
+DAY = 19
 
 
 
@@ -12,6 +12,9 @@ except Exception:
   assert inp.status_code == 200
   inp = inp.text.strip()
   open(f"INPUT{DAY}",'w').write(inp)
+
+
+
 inp = inp.strip().split('\n')
 
 for l in inp:
