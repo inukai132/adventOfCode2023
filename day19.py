@@ -111,7 +111,7 @@ while queue:
       destNode = Node(dest)
       nodes[dest] = destNode
     curNode.addConnection(conds+[cond], destNode)
-    #conds.append(f"!{cond}")
+    conds.append(f"!{cond}")
     if dest not in finished:
       queue.append((dest, funcs[dest]))
 
@@ -120,100 +120,56 @@ while queue:
 
 def dfs(node, goods):
   branches = []
-  for cond, child in node.children:
-    thisGood = goods.copy()
-    if cond != "True":
-      invert = False
-      if cond[0] == '!':
-        invert = True
+  for conds, child in node.children:
+    for cond in conds:
+      thisGood = goods.copy()
+      if cond != "True":
+        invert = False
+        if cond[0] == '!':
+          invert = True
+          cond = cond[1:]
+        var = cond[0]
         cond = cond[1:]
-      var = cond[0]
-      cond = cond[1:]
-      gl = cond[0]
-      cond = cond[1:]
-      restr = int(cond)
-      if gl == '>':
-        if invert:
-          restr = pow(2,restr-1)-1
+        gl = cond[0]
+        cond = cond[1:]
+        restr = int(cond)
+        if gl == '>':
+          if invert:
+            restr = pow(2,restr-1)-1
+          else:
+            restr = (pow(2,4000-restr-1)-1)<<restr
         else:
-          restr = (pow(2,4000-restr-1)-1)<<restr
-      else:
-        if invert:
-          restr = (pow(2,4000-restr-1)-1)<<restr
-        else:
-          restr = pow(2,restr-1)-1
-      thisGood[var] &= restr
-    branches.append(dfs(child, goods))
+          if invert:
+            restr = (pow(2,4000-restr-1)-1)<<restr
+          else:
+            restr = pow(2,restr-1)-1
+        thisGood[var] &= restr
+      branches += dfs(child, goods)
   if node.name == 'A':
-    goodCnt = 1
-    for g in goods:
-      goodCnt *= goods[g].bit_count()
-    return goodCnt
+    return [goods]
   elif node.name == 'R':
-    return 0
+    return []
+  else:
+    return branches
 
 
+def getCond(node):
+  conds = []
+  cond = []
+  for c,p in node.parents:
+    cond = []
+    c = [a for a in c if a != 'True']
+    sc = getCond(p)
+    if len(sc) == 1:
+      sc = sc[0]
+    cond = c+sc
+    conds.append(cond)
+  return conds
 
-goods = {
-  'x':2**4000-1,
-  'm':2**4000-1,
-  'a':2**4000-1,
-  's':2**4000-1,
-}
 
-eq = [nodes['A']]
-while any([type(a) == Node for a in eq]):
-  for i,n in enumerate(eq):
-    if type(n) == Node:
-      break
-  node = eq[i]
-  repl = ['(']
-  for cond,p in node.parents:
-    repl.append('(')
-    if cond != 'True':
-      repl.append(' and '.join(cond))
-      repl.append(' and ')
-    repl.append(p)
-    repl.append(')')
-    repl.append(' or ')
-  if repl[-1] == ' or ':
-    repl = repl[:-1]
-  if len(node.parents) == 0:
-    repl.append('True')
-  repl.append(')')
-  eq = eq[:i] + repl + eq[i+1:]
-eq = eq[1:-1]
-eq = ''.join(eq)
-eqb = eq
-while True:
-  eq = eq.replace('(True)','True')
-  eq = eq.replace(' and True','')
-  eq = eq.replace('True and ','')
-  if eqb == eq:
-    break
-  eqb = eq
-print(eq)
-
+eq = getCond(nodes['A'])
+print(' || '.join(['('+' && '.join(c)+')' for c in eq]))
 MAX = 4000
-def doThing(n):
-  x=(n%MAX)+1
-  n//=MAX
-  m=(n%MAX)+1
-  n//=MAX
-  a=(n%MAX)+1
-  n//=MAX
-  s=(n%MAX)+1
-  if eval(eq):
-    return 1
-  return 0
 
-
-if __name__ == '__main__':
-  from multiprocessing import Pool
-  p = Pool()
-  print(sum(p.imap_unordered(doThing, range(MAX**4), chunksize=MAX)))
-
-
-#
-# parentSum = dfs(nodes['A'], ['True'], goods)
-# print(parentSum)
+parentSum = dfs(nodes['in'], goods)
+print(parentSum)
