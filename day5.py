@@ -192,6 +192,40 @@ humidity-to-location map:
 593974860 2074095641 171967880
 1732757471 1613910675 460184966'''
 
+inpp = '''seeds: 79 14 55 13
+
+seed-to-soil map:
+50 98 2
+52 50 48
+
+soil-to-fertilizer map:
+0 15 37
+37 52 2
+39 0 15
+
+fertilizer-to-water map:
+49 53 8
+0 11 42
+42 0 7
+57 7 4
+
+water-to-light map:
+88 18 7
+18 25 70
+
+light-to-temperature map:
+45 77 23
+81 45 19
+68 64 13
+
+temperature-to-humidity map:
+0 69 1
+1 0 69
+
+humidity-to-location map:
+60 56 37
+56 93 4'''
+
 inp = inp.strip().split('\n')
 
 
@@ -199,13 +233,54 @@ seeds = [int(a) for a in inp[0].split(': ')[-1].split(' ')]
 seeds = [(seeds[i], seeds[i]+seeds[i+1]) for i in range(0, len(seeds), 2)]
 print(len(seeds))
 
-newMap = seeds
+seeds.sort(key = lambda x: x[0])
+maps = {}
+imaps = {}
+chain = ['seed','soil','fertilizer', 'water', 'light', 'temperature', 'humidity', 'location'][::-1]
 for l in inp[2:]:
+  if len(l) == 0:
+    continue
   if 'map' in l:
-    seeds = newMap
-    newMap = []
+    frm,_,to = l.split(' ')[0].split('-')
+    maps[to] = {}
+    imaps[frm] = {}
   else:
     d,s,l = [int(a) for a in l.split(' ')]
-    for st,ed in seeds:
-      delta = ed-s
-      if delta <= st:
+    maps[to][(s,s+l)] = (d,d+l)
+    imaps[frm][(d,d+l)] = (s,s+l)
+
+print(len(maps))
+
+def getSeedFromLoc(loc):
+  cur = loc
+  for k in chain[1:]:
+    cMap = imaps[k]
+    for s,e in cMap:
+      if cur >= s and cur <= e:
+        break
+    else:
+      continue
+    cur = (cur-s)+cMap[(s,e)][0]
+  for st,ed in seeds:
+    if cur >= st and cur <= ed:
+      return cur
+  return -1
+
+def search(st, ed, step):
+  for i in range(st, ed, step):
+    seed = getSeedFromLoc(i)
+    if seed != -1:
+      if step == 1:
+        print(f"Found seed {seed} at loc {i}")
+        return i
+      print(f"Found possibility at {i}, narrowing down...")
+      return search(i-step+1, i+step, step//10)
+  return -1
+
+
+offset = 0
+step = 100000
+while search(0+offset,146637027+offset,step) == -1:
+  offset += 1
+  if offset == step:
+    exit(-1)

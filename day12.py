@@ -95,6 +95,58 @@ def solveRecurse2(args, arrangements=[]):
       solveRecurse2((s_,p),arrangements)
   return arrangements
 
+def nonogramSolveCounter(l, d):
+  #.??..??...?##. 1,1,3
+
+  j=0
+  ll = l
+  dd = d.copy()
+  n = None
+  onChunk = False
+  for i,c in enumerate(l):
+    if n is None:
+      n = d[j]
+      j+=1
+    if c == '#':
+      n-=1
+      assert n >= 0
+      onChunk = True
+    if c == '.':
+      if onChunk and n==0:
+        n=None
+    if c == '?':
+      ll=l[i:]
+      dd=d[j:]
+      break
+  ll=ll[::-1]
+  dd=dd[::-1]
+  j=0
+  n=None
+  for i,c in enumerate(ll):
+    if n is None:
+      n = dd[j]
+      j+=1
+    if c == '#':
+      n-=1
+      assert n >= 0
+      onChunk = True
+    if c == '.':
+      if onChunk and n==0:
+        n=None
+    if n and ll[i:].startswith('?'*n):
+      n-=1
+      assert n >= 0
+      onChunk = True
+    if c == '?':
+      ll=ll[i:][::-1]
+      dd=dd[j:][::-1]
+      break
+  return countCombos(ll,dd)
+
+def countCombos(l,d):
+
+
+
 
 arrangements = []
 arrangements2 = []
@@ -105,11 +157,7 @@ for l in inp:
   pattern = [int(a) for a in pattern.split(',')]
   #solveRecurse(springs,pattern)
   pats.append((springs,pattern))
-  pats2.append((springs*5,pattern*5))
+  pats2.append((((springs+'?')*5)[:-1],pattern*5))
 
-if __name__ == "__main__":
-  from multiprocessing import Pool
-  p = Pool()
-  arrs = list(p.imap_unordered(solveRecurse2, pats2, chunksize=100))
-  print(arrs)
-  print(sum([len(a) for a in arrs]))
+for s,p in pats2:
+  nonogramSolveCounter(s,p)

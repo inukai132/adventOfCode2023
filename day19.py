@@ -13,7 +13,7 @@ except Exception:
   inp = inp.text.strip()
   open(f"INPUT{DAY}",'w').write(inp)
 
-inpp = '''px{a<2006:qkq,m>2090:A,rfg}
+inp = '''px{a<2006:qkq,m>2090:A,rfg}
 pv{a>1716:R,A}
 lnx{m>1548:A,A}
 rfg{s<537:gd,x>2440:R,A}
@@ -169,6 +169,33 @@ def getCond(node):
 
 eq = getCond(nodes['A'])
 print(' || '.join(['('+' && '.join(c)+')' for c in eq]))
+import string
+nodesSymbs = {}
+nodesSymbs_ = {}
+eq_=[]
+import boolean
+b_eq=True
+for b in eq:
+  b_=[]
+  for n in b:
+    inv=False
+    if n[0] == '!':
+      inv=True
+      n=n[1:]
+    if n not in nodesSymbs:
+      nodesSymbs[n] = string.ascii_uppercase[len(nodesSymbs)]
+      nodesSymbs_[n] = string.ascii_uppercase[len(nodesSymbs)]
+    b_.append(('!' if inv else '')+nodesSymbs[n])
+  eq_.append(b_)
+
+
+alg = ' || '.join(['('+' && '.join(c)+')' for c in eq_])
+print(alg)
+
+
+print(nodesSymbs)
+
+
 MAX = 4000
 
 parentSum = dfs(nodes['in'], goods)
