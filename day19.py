@@ -174,29 +174,37 @@ nodesSymbs = {}
 nodesSymbs_ = {}
 eq_=[]
 import boolean
-b_eq=True
+algebra = boolean.BooleanAlgebra()
+TRUE, FALSE, NOT, AND, OR, symbol = algebra.definition()
+b_eq=FALSE
 for b in eq:
   b_=[]
+  subEq = TRUE
   for n in b:
     inv=False
     if n[0] == '!':
       inv=True
       n=n[1:]
     if n not in nodesSymbs:
-      nodesSymbs[n] = string.ascii_uppercase[len(nodesSymbs)]
-      nodesSymbs_[n] = string.ascii_uppercase[len(nodesSymbs)]
+      x = len(nodesSymbs)
+      x = string.ascii_letters[x%26]+str(x//26)
+      nodesSymbs[n] = x
+      nodesSymbs_[n] = algebra.symbols(x)[0]
     b_.append(('!' if inv else '')+nodesSymbs[n])
+    subEq = subEq & NOT(nodesSymbs_[n]) if inv else nodesSymbs_[n]
   eq_.append(b_)
-
+  b_eq = b_eq | subEq
+  b_eq = b_eq.simplify()
 
 alg = ' || '.join(['('+' && '.join(c)+')' for c in eq_])
 print(alg)
-
+print(b_eq.simplify())
 
 print(nodesSymbs)
+for s in b_eq.objects:
+  for k,v in nodesSymbs.items():
+    if v==s:
+      print(F"{v}: {k}")
+      break
 
-
-MAX = 4000
-
-parentSum = dfs(nodes['in'], goods)
-print(parentSum)
+exit()
